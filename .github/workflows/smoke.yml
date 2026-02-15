@@ -1,0 +1,48 @@
+name: Smoke (Postman)
+
+on:
+  push:
+    branches: [main, master]
+  workflow_dispatch:
+
+defaults:
+  run:
+    working-directory: api-tests
+
+jobs:
+  smoke:
+    name: Postman Smoke
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: api-tests/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci || npm install
+
+      - name: Run Newman (Smoke – E2E Flow)
+        run: npm run test:postman:smoke:ci
+        env:
+          BASE_URL: ${{ secrets.BASE_URL || 'https://fakerestapi.azurewebsites.net' }}
+          AUTH_TOKEN: ${{ secrets.AUTH_TOKEN || 'mock-jwt-token-for-testing' }}
+
+      - name: Publish Test Results
+        uses: EnricoMi/publish-unit-test-result-action@v2
+        if: always()
+        with:
+          files: api-tests/reports/newman/junit.xml
+          check_name: Postman Smoke Test Results
+
+      - name: Upload Newman report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: newman-smoke-report
+          path: api-tests/reports/newman/
+          retention-days: 30

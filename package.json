@@ -1,0 +1,17 @@
+{
+  "name": "api-tests",
+  "version": "1.0.0",
+  "private": true,
+  "description": "API testing (Postman/Newman, Playwright, k6) for Fake REST API Users",
+  "scripts": {
+    "test:postman": "node --no-deprecation scripts/run-newman.js",
+    "test:postman:ci": "node --no-deprecation scripts/run-newman.js --ci",
+    "test:postman:smoke:ci": "node --no-deprecation scripts/run-newman.js --ci --folder \"Users – E2E Flow\"",
+    "test:postman:atomic": "node --no-deprecation scripts/run-newman.js --folder \"Users – Atomic\"",
+    "test:postman:e2e": "node --no-deprecation scripts/run-newman.js --folder \"Users – E2E Flow\""
+  },
+  "dependencies": {
+    "newman": "^6.2.0",
+    "newman-reporter-htmlextra": "^1.23.1"
+  }
+}

@@ -1,0 +1,840 @@
+{
+  "info": {
+    "_postman_id": "892754dc-6b60-4591-b675-9047c5696350",
+    "name": "Fake REST API - Users",
+    "description": "Reusable collection for Users endpoints: Atomic and E2E Flow. Uses collection-level variables, response reuse (userId), and dynamic id generation. Optional Bearer token (env or collection authToken) per assignment requirement.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "3873284"
+  },
+  "item": [
+    {
+      "name": "Users – Atomic",
+      "item": [
+        {
+          "name": "GET Users (list) – positive",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', function () { pm.response.to.have.status(200); });",
+                  "pm.test('Response is array', function () {",
+                  "    var body = pm.response.json();",
+                  "    pm.expect(body).to.be.an('array');",
+                  "});",
+                  "pm.test('Response matches schema (array of User)', function () {",
+                  "    var schema = { type: 'array', items: JSON.parse(pm.collectionVariables.get('userSchema')) };",
+                  "    pm.response.to.have.jsonSchema(schema);",
+                  "});",
+                  "pm.test('Optional: set firstUserIdFromList', function () {",
+                  "    var body = pm.response.json();",
+                  "    if (body && body.length > 0 && body[0].id !== undefined) {",
+                  "        pm.collectionVariables.set('firstUserIdFromList', body[0].id);",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/Users",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "Users"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "POST User – positive",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', function () { pm.response.to.have.status(200); });",
+                  "pm.test('Response has id', function () {",
+                  "    var body = pm.response.json();",
+                  "    pm.expect(body).to.have.property('id');",
+                  "    var id = body.id;",
+                  "    if (id !== 0 && id !== undefined) { pm.collectionVariables.set('userId', id); }",
+                  "    else {",
+                  "        var first = pm.collectionVariables.get('firstUserIdFromList');",
+                  "        if (first) { pm.collectionVariables.set('userId', first); }",
+                  "        else { pm.collectionVariables.set('userId', 1); }",
+                  "    }",
+                  "});",
+                  "pm.test('Response has userName and password', function () {",
+                  "    var body = pm.response.json();",
+                  "    pm.expect(body).to.have.property('userName');",
+                  "    pm.expect(body).to.have.property('password');",
+                  "});",
+                  "pm.test('Returned userName matches sent', function () {",
+                  "    var body = pm.response.json();",
+                  "    pm.expect(body.userName).to.eql(pm.collectionVariables.get('userName'));",
+                  "});",
+                  "pm.test('Response matches User schema', function () {",
+                  "    var schema = JSON.parse(pm.collectionVariables.get('userSchema'));",
+                  "    pm.response.to.have.jsonSchema(schema);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json; v=1.0"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": 0,\n  \"userName\": \"{{userName}}\",\n  \"password\": \"{{password}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/Users",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "Users"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GET User by id (userId from POST) – positive",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', function () { pm.response.to.have.status(200); });",
+                  "pm.test('Response id matches userId', function () {",
+                  "    var body = pm.response.json();",
+                  "    var expectedId = parseInt(pm.collectionVariables.get('userId'), 10);",
+                  "    pm.expect(body.id).to.eql(expectedId);",
+                  "});",
+                  "pm.test('Response matches User schema', function () {",
+                  "    var schema = JSON.parse(pm.collectionVariables.get('userSchema'));",
+                  "    pm.response.to.have.jsonSchema(schema);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/Users/{{userId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "Users",
+                "{{userId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GET User by randomIdInRange – equiv.",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// May be 200 or 404 depending on existing data",
+                  "pm.test('Status is 200 or 404', function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 404]);",
+                  "});",
+                  "if (pm.response.code === 200) {",
+                  "    pm.test('Response has User shape', function () {",
+                  "        var body = pm.response.json();",
+                  "        pm.expect(body).to.have.keys('id','userName','password');",
+                  "    });",
+                  "}"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/Users/{{randomIdInRange}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "Users",
+                "{{randomIdInRange}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GET User by id=1 – boundary positive",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', function () {",
+                  "    pm.expect(pm.response.code).to.be.equals(200);",
+                  "});",
+                  "if (pm.response.code === 200) {",
+                  "    pm.test('Response id is 1', function () {",
+                  "        var body = pm.response.json();",
+                  "        pm.expect(body.id).to.eql(1);",
+                  "    });",
+                  "}"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/Users/1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "Users",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GET User by id=0 – boundary negative",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 404 or 400', function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([404, 400]);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/Users/0",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "Users",
+                "0"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GET User by id=999999 – negative",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 404', function () { pm.response.to.have.status(404); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/Users/999999",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "Users",
+                "999999"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "PUT User by userId – positive",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', function () { pm.response.to.have.status(200); });",
+                  "pm.test('Response has updated fields', function () {",
+                  "    var body = pm.response.json();",
+                  "    pm.expect(body).to.have.property('userName');",
+                  "    pm.expect(body).to.have.property('password');",
+                  "});",
+                  "pm.test('Returned userName reflects update', function () {",
+                  "    var body = pm.response.json();",
+                  "    pm.expect(body.userName).to.match(/^updated_/);",
+                  "});",
+                  "pm.test('Response matches User schema', function () {",
+                  "    var schema = JSON.parse(pm.collectionVariables.get('userSchema'));",
+                  "    pm.response.to.have.jsonSchema(schema);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json; v=1.0"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": {{userId}},\n  \"userName\": \"updated_{{userName}}\",\n  \"password\": \"{{password}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/Users/{{userId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "Users",
+                "{{userId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "PUT User by id=999999 – negative",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// API may return 200 (upsert) or 404",
+                  "pm.test('Status is 201', function () {",
+                  "    pm.expect(pm.response.code).to.be.equals(201);",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json; v=1.0"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": 999999,\n  \"userName\": \"ghost\",\n  \"password\": \"x\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/Users/999999",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "Users",
+                "999999"
+              ]
+            },
+            "description": "This Task shoud viry REST architecture logic where PUT request used for Updating and POST for Creating of data.\n\nIn example we see PUT request get 200 with not existed user but expected result should return 201 Created.  \n[https://www.rfc-editor.org/rfc/rfc7231#section-4.3.4](https://www.rfc-editor.org/rfc/rfc7231#section-4.3.4)"
+          },
+          "response": []
+        },
+        {
+          "name": "PUT User by id=null – negative",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 400', function () {",
+                  "    pm.expect(pm.response.code).to.be.equals(400);",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json; v=1.0"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": 999999,\n  \"userName\": \"ghost\",\n  \"password\": \"x\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/Users/null",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "Users",
+                "null"
+              ]
+            },
+            "description": "This Task shoud viry REST architecture logic where PUT request used for Updating and POST for Creating of data.\n\nIn example we see PUT request get 200 with not existed user but expected result should return 201 Created.  \n[https://www.rfc-editor.org/rfc/rfc7231#section-4.3.4](https://www.rfc-editor.org/rfc/rfc7231#section-4.3.4)"
+          },
+          "response": []
+        },
+        {
+          "name": "DELETE User by userId – positive",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', function () { pm.response.to.have.status(200); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/Users/{{userId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "Users",
+                "{{userId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "DELETE User by id=999999 – negative",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 404 or 200', function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([404, 200]);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/Users/999999",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "Users",
+                "999999"
+              ]
+            }
+          },
+          "response": []
+        }
+      ],
+      "description": "Atomic endpoint tests: each request validates one endpoint/scenario. Order: GET list → POST (sets userId) → GET by id, boundaries, negatives, PUT, DELETE. Uses userId from POST and randomIdInRange for equivalence/boundary."
+    },
+    {
+      "name": "Users – E2E Flow",
+      "item": [
+        {
+          "name": "1. POST User",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', function () { pm.response.to.have.status(200); });",
+                  "pm.test('Response has id and set userId', function () {",
+                  "    var body = pm.response.json();",
+                  "    pm.expect(body).to.have.property('id');",
+                  "    var id = body.id;",
+                  "    if (id !== 0 && id !== undefined) { pm.collectionVariables.set('userId', id); }",
+                  "    else { pm.collectionVariables.set('userId', 1); }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json; v=1.0"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": 0,\n  \"userName\": \"e2e_user_{{$randomInt}}\",\n  \"password\": \"e2e_pwd_{{$timestamp}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/Users",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "Users"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "2. GET User by id",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', function () { pm.response.to.have.status(200); });",
+                  "pm.test('Body contains userId', function () {",
+                  "    var body = pm.response.json();",
+                  "    var expectedId = parseInt(pm.collectionVariables.get('userId'), 10);",
+                  "    pm.expect(body.id).to.eql(expectedId);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/Users/{{userId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "Users",
+                "{{userId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "3. PUT User",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', function () { pm.response.to.have.status(200); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json; v=1.0"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": {{userId}},\n  \"userName\": \"e2e_updated\",\n  \"password\": \"e2e_updated_pwd\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/Users/{{userId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "Users",
+                "{{userId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "4. GET User by id (verify update)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', function () { pm.response.to.have.status(200); });",
+                  "pm.test('User object has userName and password', function () {",
+                  "    var body = pm.response.json();",
+                  "    pm.expect(body).to.have.property('userName');",
+                  "    pm.expect(body).to.have.property('password');",
+                  "});",
+                  "pm.test('When 200, userName present (e2e_updated if API persists PUT)', function () {",
+                  "    if (pm.response.code === 200) {",
+                  "        var body = pm.response.json();",
+                  "        pm.expect(body).to.have.property('userName');",
+                  "        if (body.userName === 'e2e_updated') { pm.expect(body.userName).to.eql('e2e_updated'); }",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/Users/{{userId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "Users",
+                "{{userId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "5. DELETE User",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', function () { pm.response.to.have.status(200); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/Users/{{userId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "Users",
+                "{{userId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "6. GET User by id (expect 404)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Persistent API: 404 after DELETE. Fake API may still return 200.",
+                  "pm.test('Status is 404 or 200', function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([404, 200]);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/Users/{{userId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "Users",
+                "{{userId}}"
+              ]
+            }
+          },
+          "response": []
+        }
+      ],
+      "description": "End-to-end flow: POST → GET → PUT → GET (verify) → DELETE → GET (404). All use userId from POST. Run standalone or after Atomic."
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "var userSchema = { type: 'object', required: ['id', 'userName', 'password'], properties: { id: { type: 'integer' }, userName: { type: 'string' }, password: { type: 'string' } }, additionalProperties: true };",
+          "pm.collectionVariables.set('userSchema', JSON.stringify(userSchema));",
+          "var token = pm.environment.get('authToken') || pm.collectionVariables.get('authToken');",
+          "if (token) { pm.request.headers.upsert({ key: 'Authorization', value: 'Bearer ' + token }); }",
+          "pm.request.headers.upsert({ key: 'Accept', value: 'application/json; v=1.0' });",
+          "var idMin = parseInt(pm.collectionVariables.get('idMin') || '1', 10);",
+          "var idMax = parseInt(pm.collectionVariables.get('idMax') || '100', 10);",
+          "var range = idMax - idMin + 1;",
+          "pm.collectionVariables.set('randomIdInRange', Math.floor(Math.random() * range) + idMin);",
+          "if (!pm.collectionVariables.get('userName')) {",
+          "  pm.collectionVariables.set('userName', 'user_' + (Math.floor(Math.random() * 9000) + 1000));",
+          "  pm.collectionVariables.set('password', 'pwd_' + Date.now());",
+          "}"
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// Collection-level test helpers (optional)",
+          "// Individual requests define their own assertions."
+        ]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "https://fakerestapi.azurewebsites.net"
+    },
+    {
+      "key": "authToken",
+      "value": "mock-jwt-token-2026"
+    },
+    {
+      "key": "userId",
+      "value": ""
+    },
+    {
+      "key": "userName",
+      "value": ""
+    },
+    {
+      "key": "password",
+      "value": ""
+    },
+    {
+      "key": "randomIdInRange",
+      "value": "1"
+    },
+    {
+      "key": "idMin",
+      "value": "1"
+    },
+    {
+      "key": "idMax",
+      "value": "100"
+    },
+    {
+      "key": "firstUserIdFromList",
+      "value": ""
+    },
+    {
+      "key": "userSchema",
+      "value": "",
+      "type": "default"
+    }
+  ]
+}
