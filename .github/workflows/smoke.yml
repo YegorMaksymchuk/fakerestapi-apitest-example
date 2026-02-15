@@ -9,10 +9,6 @@ permissions:
   contents: read
   checks: write
 
-defaults:
-  run:
-    working-directory: api-tests
-
 jobs:
   smoke:
     name: Postman Smoke
@@ -39,7 +35,7 @@ jobs:
         uses: EnricoMi/publish-unit-test-result-action@v2
         if: success() || failure()
         with:
-          files: ./reports/newman/junit.xml
+          files: reports/newman/junit.xml
           check_name: Postman Smoke Test Results
 
       - name: Upload Newman report
@@ -47,5 +43,5 @@ jobs:
         if: success() || failure()
         with:
           name: newman-smoke-report
-          path: ./reports/newman/
+          path: reports/newman/
           retention-days: 30
