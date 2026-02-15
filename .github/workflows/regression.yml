@@ -37,7 +37,7 @@ jobs:
         uses: EnricoMi/publish-unit-test-result-action@v2
         if: success() || failure()
         with:
-          files: api-tests/reports/newman/junit.xml
+          files: ./reports/newman/junit.xml
           check_name: Postman Regression Test Results
 
       - name: Upload Newman report
@@ -45,5 +45,5 @@ jobs:
         if: success() || failure()
         with:
           name: newman-regression-report
-          path: api-tests/reports/newman/
+          path: ./reports/newman/
           retention-days: 30
