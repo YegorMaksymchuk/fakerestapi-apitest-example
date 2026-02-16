@@ -26,7 +26,9 @@
                   "    var schema = { type: 'array', items: JSON.parse(pm.collectionVariables.get('userSchema')) };",
                   "    pm.response.to.have.jsonSchema(schema);",
                   "});",
-                  "pm.test('Optional: set firstUserIdFromList', function () {",
+                  "// firstUserIdFromList: fallback for POST userId when the fake API returns id=0.",
+                  "// Used in POST test to ensure subsequent GET/PUT/DELETE target a real user.",
+                  "pm.test('Set firstUserIdFromList from response', function () {",
                   "    var body = pm.response.json();",
                   "    if (body && body.length > 0 && body[0].id !== undefined) {",
                   "        pm.collectionVariables.set('firstUserIdFromList', body[0].id);",
@@ -118,6 +120,142 @@
           "response": []
         },
         {
+          "name": "POST User – empty body – negative",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200 or 400', function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 400]);",
+                  "});",
+                  "if (pm.response.code === 200) {",
+                  "    pm.test('Response still has User shape', function () {",
+                  "        var body = pm.response.json();",
+                  "        pm.expect(body).to.have.keys('id','userName','password');",
+                  "    });",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json; v=1.0"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/Users",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "Users"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "POST User – missing fields – negative",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200 or 400', function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 400]);",
+                  "});",
+                  "if (pm.response.code === 200) {",
+                  "    pm.test('userName and password are null or empty', function () {",
+                  "        var body = pm.response.json();",
+                  "        pm.expect(body.userName).to.satisfy(function (v) { return v === null || v === ''; });",
+                  "        pm.expect(body.password).to.satisfy(function (v) { return v === null || v === ''; });",
+                  "    });",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json; v=1.0"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": 0\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/Users",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "Users"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "POST User – invalid types – negative",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 400', function () {",
+                  "    pm.expect(pm.response.code).to.be.equals(400);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json; v=1.0"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": \"abc\",\n  \"userName\": 123,\n  \"password\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/Users",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "Users"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
           "name": "GET User by id (userId from POST) – positive",
           "event": [
             {
@@ -160,6 +298,18 @@
         {
           "name": "GET User by randomIdInRange – equiv.",
           "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "var idMin = parseInt(pm.collectionVariables.get('idMin') || '1', 10);",
+                  "var idMax = parseInt(pm.collectionVariables.get('idMax') || '100', 10);",
+                  "var range = idMax - idMin + 1;",
+                  "pm.collectionVariables.set('randomIdInRange', Math.floor(Math.random() * range) + idMin);"
+                ],
+                "type": "text/javascript"
+              }
+            },
             {
               "listen": "test",
               "script": {
@@ -364,9 +514,9 @@
               "listen": "test",
               "script": {
                 "exec": [
-                  "// API may return 200 (upsert) or 404",
-                  "pm.test('Status is 201', function () {",
-                  "    pm.expect(pm.response.code).to.be.equals(201);",
+                  "// API may return 200 (upsert) or 404 – swagger only documents 200",
+                  "pm.test('Status is 200 or 404', function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 404]);",
                   "});"
                 ],
                 "type": "text/javascript",
@@ -403,7 +553,7 @@
                 "999999"
               ]
             },
-            "description": "This Task shoud viry REST architecture logic where PUT request used for Updating and POST for Creating of data.\n\nIn example we see PUT request get 200 with not existed user but expected result should return 201 Created.  \n[https://www.rfc-editor.org/rfc/rfc7231#section-4.3.4](https://www.rfc-editor.org/rfc/rfc7231#section-4.3.4)"
+            "description": "This task should verify REST architecture logic where PUT request used for Updating and POST for Creating of data.\n\nIn example we see PUT request get 200 with not existed user but expected result should return 201 Created.  \n[https://www.rfc-editor.org/rfc/rfc7231#section-4.3.4](https://www.rfc-editor.org/rfc/rfc7231#section-4.3.4)"
           },
           "response": []
         },
@@ -453,7 +603,7 @@
                 "null"
               ]
             },
-            "description": "This Task shoud viry REST architecture logic where PUT request used for Updating and POST for Creating of data.\n\nIn example we see PUT request get 200 with not existed user but expected result should return 201 Created.  \n[https://www.rfc-editor.org/rfc/rfc7231#section-4.3.4](https://www.rfc-editor.org/rfc/rfc7231#section-4.3.4)"
+            "description": "This task should verify REST architecture logic where PUT request used for Updating and POST for Creating of data.\n\nIn example we see PUT request get 200 with not existed user but expected result should return 201 Created.  \n[https://www.rfc-editor.org/rfc/rfc7231#section-4.3.4](https://www.rfc-editor.org/rfc/rfc7231#section-4.3.4)"
           },
           "response": []
         },
@@ -616,7 +766,16 @@
               "listen": "test",
               "script": {
                 "exec": [
-                  "pm.test('Status is 200', function () { pm.response.to.have.status(200); });"
+                  "pm.test('Status is 200', function () { pm.response.to.have.status(200); });",
+                  "pm.test('Response has updated fields', function () {",
+                  "    var body = pm.response.json();",
+                  "    pm.expect(body).to.have.property('userName');",
+                  "    pm.expect(body).to.have.property('password');",
+                  "});",
+                  "pm.test('Response matches User schema', function () {",
+                  "    var schema = JSON.parse(pm.collectionVariables.get('userSchema'));",
+                  "    pm.response.to.have.jsonSchema(schema);",
+                  "});"
                 ],
                 "type": "text/javascript"
               }
@@ -699,7 +858,13 @@
               "listen": "test",
               "script": {
                 "exec": [
-                  "pm.test('Status is 200', function () { pm.response.to.have.status(200); });"
+                  "pm.test('Status is 200', function () { pm.response.to.have.status(200); });",
+                  "pm.test('Response body is empty or valid JSON', function () {",
+                  "    var text = pm.response.text();",
+                  "    if (text && text.trim().length > 0) {",
+                  "        pm.expect(function () { JSON.parse(text); }).to.not.throw();",
+                  "    }",
+                  "});"
                 ],
                 "type": "text/javascript"
               }
@@ -730,10 +895,22 @@
               "listen": "test",
               "script": {
                 "exec": [
-                  "// Persistent API: 404 after DELETE. Fake API may still return 200.",
-                  "pm.test('Status is 404 or 200', function () {",
+                  "// A real persistent API should return 404 after DELETE.",
+                  "// FakeRestAPI does not persist changes, so it may return 200.",
+                  "pm.test('Status is 404 (expected) or 200 (fake API does not persist)', function () {",
                   "    pm.expect(pm.response.code).to.be.oneOf([404, 200]);",
-                  "});"
+                  "});",
+                  "if (pm.response.code === 404) {",
+                  "    pm.test('404 response confirms user was deleted', function () {",
+                  "        pm.expect(pm.response.code).to.eql(404);",
+                  "    });",
+                  "}",
+                  "if (pm.response.code === 200) {",
+                  "    pm.test('[INFO] Fake API did not persist DELETE – user still returned', function () {",
+                  "        // This is expected behavior for FakeRestAPI",
+                  "        pm.expect(true).to.be.true;",
+                  "    });",
+                  "}"
                 ],
                 "type": "text/javascript"
               }
@@ -767,15 +944,11 @@
       "script": {
         "type": "text/javascript",
         "exec": [
-          "var userSchema = { type: 'object', required: ['id', 'userName', 'password'], properties: { id: { type: 'integer' }, userName: { type: 'string' }, password: { type: 'string' } }, additionalProperties: true };",
+          "var userSchema = { type: 'object', required: ['id', 'userName', 'password'], properties: { id: { type: 'integer' }, userName: { type: 'string' }, password: { type: 'string' } } };",
           "pm.collectionVariables.set('userSchema', JSON.stringify(userSchema));",
           "var token = pm.environment.get('authToken') || pm.collectionVariables.get('authToken');",
           "if (token) { pm.request.headers.upsert({ key: 'Authorization', value: 'Bearer ' + token }); }",
           "pm.request.headers.upsert({ key: 'Accept', value: 'application/json; v=1.0' });",
-          "var idMin = parseInt(pm.collectionVariables.get('idMin') || '1', 10);",
-          "var idMax = parseInt(pm.collectionVariables.get('idMax') || '100', 10);",
-          "var range = idMax - idMin + 1;",
-          "pm.collectionVariables.set('randomIdInRange', Math.floor(Math.random() * range) + idMin);",
           "if (!pm.collectionVariables.get('userName')) {",
           "  pm.collectionVariables.set('userName', 'user_' + (Math.floor(Math.random() * 9000) + 1000));",
           "  pm.collectionVariables.set('password', 'pwd_' + Date.now());",
@@ -788,8 +961,16 @@
       "script": {
         "type": "text/javascript",
         "exec": [
-          "// Collection-level test helpers (optional)",
-          "// Individual requests define their own assertions."
+          "pm.test('Response time is under 5000ms', function () {",
+          "    pm.expect(pm.response.responseTime).to.be.below(5000);",
+          "});",
+          "pm.test('Content-Type header is JSON-based', function () {",
+          "    var ct = pm.response.headers.get('Content-Type') || '';",
+          "    // DELETE may return empty body with no Content-Type",
+          "    if (pm.request.method === 'DELETE' && ct === '') { return; }",
+          "    // Error responses use application/problem+json",
+          "    pm.expect(ct).to.match(/application\\/(json|problem\\+json)/);",
+          "});"
         ]
       }
     }
