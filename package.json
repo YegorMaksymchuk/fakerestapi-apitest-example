@@ -10,7 +10,8 @@
     "test:postman:atomic": "node --no-deprecation scripts/run-newman.js --folder \"Users – Atomic\"",
     "test:postman:boundary": "node --no-deprecation scripts/run-newman.js --folder \"Users – Boundary\"",
     "test:postman:content-type": "node --no-deprecation scripts/run-newman.js --folder \"Users – Content-Type\"",
-    "test:postman:e2e": "node --no-deprecation scripts/run-newman.js --folder \"Users – E2E Flow\""
+    "test:postman:e2e": "node --no-deprecation scripts/run-newman.js --folder \"Users – E2E Flow\"",
+    "test:docker": "bash scripts/docker-test.sh"
   },
   "dependencies": {
     "newman": "^6.2.0",
