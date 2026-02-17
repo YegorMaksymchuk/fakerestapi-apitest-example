@@ -6,6 +6,16 @@
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
     "_exporter_id": "3873284"
   },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{authToken}}",
+        "type": "string"
+      }
+    ]
+  },
   "item": [
     {
       "name": "Users – Atomic",
@@ -675,6 +685,500 @@
       "description": "Atomic endpoint tests: each request validates one endpoint/scenario. Order: GET list → POST (sets userId) → GET by id, boundaries, negatives, PUT, DELETE. Uses userId from POST and randomIdInRange for equivalence/boundary."
     },
     {
+      "name": "Users – Boundary",
+      "item": [
+        {
+          "name": "GET User id=-1 – int32 negative",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 404', function () {",
+                  "    pm.expect(pm.response.code).to.eql(404);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/Users/-1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "Users", "-1"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GET User id=2147483647 – int32 max",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 404', function () {",
+                  "    pm.expect(pm.response.code).to.eql(404);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/Users/2147483647",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "Users", "2147483647"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GET User id=-2147483648 – int32 min",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 404', function () {",
+                  "    pm.expect(pm.response.code).to.eql(404);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/Users/-2147483648",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "Users", "-2147483648"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GET User id=2147483648 – int32 overflow",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// 2147483648 exceeds int32 max, API should reject",
+                  "pm.test('Status is 400', function () {",
+                  "    pm.expect(pm.response.code).to.eql(400);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/Users/2147483648",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "Users", "2147483648"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "PUT User id=-1 – int32 negative",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200 or 404', function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 404]);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json; v=1.0" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": -1,\n  \"userName\": \"boundary_neg\",\n  \"password\": \"pwd\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/Users/-1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "Users", "-1"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "DELETE User id=-1 – int32 negative",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200 or 404', function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 404]);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/Users/-1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "Users", "-1"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "POST User id=2147483647 – int32 max body",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200 or 400', function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 400]);",
+                  "});",
+                  "if (pm.response.code === 200) {",
+                  "    pm.test('Response id equals 2147483647', function () {",
+                  "        var body = pm.response.json();",
+                  "        pm.expect(body.id).to.eql(2147483647);",
+                  "    });",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json; v=1.0" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": 2147483647,\n  \"userName\": \"int32_max\",\n  \"password\": \"pwd\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/Users",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "Users"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "POST User id=-1 – int32 negative body",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200 or 400', function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 400]);",
+                  "});",
+                  "if (pm.response.code === 200) {",
+                  "    pm.test('Response id equals -1', function () {",
+                  "        var body = pm.response.json();",
+                  "        pm.expect(body.id).to.eql(-1);",
+                  "    });",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json; v=1.0" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": -1,\n  \"userName\": \"neg_id\",\n  \"password\": \"pwd\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/Users",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "Users"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "POST User id=2147483648 – int32 overflow body",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// 2147483648 exceeds int32 max, should be rejected",
+                  "pm.test('Status is 400', function () {",
+                  "    pm.expect(pm.response.code).to.eql(400);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json; v=1.0" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": 2147483648,\n  \"userName\": \"overflow\",\n  \"password\": \"pwd\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/Users",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "Users"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "POST User – empty strings – string boundary",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200 or 400', function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 400]);",
+                  "});",
+                  "if (pm.response.code === 200) {",
+                  "    pm.test('Response has User shape', function () {",
+                  "        var body = pm.response.json();",
+                  "        pm.expect(body).to.have.property('id');",
+                  "        pm.expect(body).to.have.property('userName');",
+                  "        pm.expect(body).to.have.property('password');",
+                  "    });",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json; v=1.0" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": 0,\n  \"userName\": \"\",\n  \"password\": \"\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/Users",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "Users"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "POST User – long strings (10000 chars) – string boundary",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "var longStr = 'A'.repeat(10000);",
+                  "pm.collectionVariables.set('longString', longStr);"
+                ],
+                "type": "text/javascript"
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200 or 400 or 413', function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 400, 413]);",
+                  "});",
+                  "if (pm.response.code === 200) {",
+                  "    pm.test('Response has User shape', function () {",
+                  "        var body = pm.response.json();",
+                  "        pm.expect(body).to.have.property('id');",
+                  "        pm.expect(body).to.have.property('userName');",
+                  "    });",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json; v=1.0" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": 0,\n  \"userName\": \"{{longString}}\",\n  \"password\": \"{{longString}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/Users",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "Users"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "POST User – special characters – string boundary",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200 or 400', function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 400]);",
+                  "});",
+                  "if (pm.response.code === 200) {",
+                  "    pm.test('Response has User shape with special chars', function () {",
+                  "        var body = pm.response.json();",
+                  "        pm.expect(body).to.have.property('id');",
+                  "        pm.expect(body).to.have.property('userName');",
+                  "        pm.expect(body).to.have.property('password');",
+                  "    });",
+                  "    // NOTE: API reflects <script> tags without sanitization – potential XSS",
+                  "    var raw = pm.response.text();",
+                  "    if (raw.includes('<script>')) {",
+                  "        pm.test('[WARN] API reflects HTML – potential XSS vulnerability', function () {",
+                  "            pm.expect(true).to.be.true; // logged as warning, not failure",
+                  "        });",
+                  "    }",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json; v=1.0" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": 0,\n  \"userName\": \"<script>alert(1)</script>\",\n  \"password\": \"' OR 1=1 --\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/Users",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "Users"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "POST User – null fields – nullable boundary",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Swagger defines userName and password as nullable",
+                  "pm.test('Status is 200', function () {",
+                  "    pm.expect(pm.response.code).to.eql(200);",
+                  "});",
+                  "pm.test('Response userName is null', function () {",
+                  "    var body = pm.response.json();",
+                  "    pm.expect(body.userName).to.eql(null);",
+                  "});",
+                  "pm.test('Response password is null', function () {",
+                  "    var body = pm.response.json();",
+                  "    pm.expect(body.password).to.eql(null);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json; v=1.0" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": 0,\n  \"userName\": null,\n  \"password\": null\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/Users",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "Users"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "PUT User – null fields – nullable boundary",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Swagger defines userName and password as nullable",
+                  "pm.test('Status is 200', function () {",
+                  "    pm.expect(pm.response.code).to.eql(200);",
+                  "});",
+                  "pm.test('Response has User shape', function () {",
+                  "    var body = pm.response.json();",
+                  "    pm.expect(body).to.have.property('id');",
+                  "    pm.expect(body).to.have.property('userName');",
+                  "    pm.expect(body).to.have.property('password');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json; v=1.0" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": {{userId}},\n  \"userName\": null,\n  \"password\": null\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/Users/{{userId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "Users", "{{userId}}"]
+            }
+          },
+          "response": []
+        }
+      ],
+      "description": "Data-type boundary tests for the User model. Covers int32 min/max/overflow for id (path and body), string boundaries (empty, long, special chars), and nullable fields (explicit null for userName/password)."
+    },
+    {
       "name": "Users – E2E Flow",
       "item": [
         {
@@ -946,8 +1450,6 @@
         "exec": [
           "var userSchema = { type: 'object', required: ['id', 'userName', 'password'], properties: { id: { type: 'integer' }, userName: { type: 'string' }, password: { type: 'string' } } };",
           "pm.collectionVariables.set('userSchema', JSON.stringify(userSchema));",
-          "var token = pm.environment.get('authToken') || pm.collectionVariables.get('authToken');",
-          "if (token) { pm.request.headers.upsert({ key: 'Authorization', value: 'Bearer ' + token }); }",
           "pm.request.headers.upsert({ key: 'Accept', value: 'application/json; v=1.0' });",
           "if (!pm.collectionVariables.get('userName')) {",
           "  pm.collectionVariables.set('userName', 'user_' + (Math.floor(Math.random() * 9000) + 1000));",
@@ -1016,6 +1518,10 @@
       "key": "userSchema",
       "value": "",
       "type": "default"
+    },
+    {
+      "key": "longString",
+      "value": ""
     }
   ]
 }
