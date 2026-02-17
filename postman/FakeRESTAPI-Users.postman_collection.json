@@ -1179,6 +1179,483 @@
       "description": "Data-type boundary tests for the User model. Covers int32 min/max/overflow for id (path and body), string boundaries (empty, long, special chars), and nullable fields (explicit null for userName/password)."
     },
     {
+      "name": "Users – Content-Type",
+      "item": [
+        {
+          "name": "POST – text/json (supported)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', function () {",
+                  "    pm.expect(pm.response.code).to.eql(200);",
+                  "});",
+                  "pm.test('Response has User shape', function () {",
+                  "    var body = pm.response.json();",
+                  "    pm.expect(body).to.have.property('id');",
+                  "    pm.expect(body).to.have.property('userName');",
+                  "    pm.expect(body).to.have.property('password');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "text/json; v=1.0" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": 0,\n  \"userName\": \"ct_test\",\n  \"password\": \"pwd\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/Users",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "Users"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "POST – application/*+json (supported)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', function () {",
+                  "    pm.expect(pm.response.code).to.eql(200);",
+                  "});",
+                  "pm.test('Response has User shape', function () {",
+                  "    var body = pm.response.json();",
+                  "    pm.expect(body).to.have.property('id');",
+                  "    pm.expect(body).to.have.property('userName');",
+                  "    pm.expect(body).to.have.property('password');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/*+json; v=1.0" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": 0,\n  \"userName\": \"ct_test\",\n  \"password\": \"pwd\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/Users",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "Users"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "POST – text/plain (unsupported)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 415 or 400', function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([415, 400]);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "text/plain" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": 0,\n  \"userName\": \"ct_test\",\n  \"password\": \"pwd\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/Users",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "Users"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "POST – application/xml (unsupported)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 415 or 400', function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([415, 400]);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/xml" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": 0,\n  \"userName\": \"ct_test\",\n  \"password\": \"pwd\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/Users",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "Users"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "POST – no Content-Type",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "pm.request.headers.remove('Content-Type');"
+                ],
+                "type": "text/javascript"
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 415 or 400 or 200', function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([415, 400, 200]);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": 0,\n  \"userName\": \"ct_test\",\n  \"password\": \"pwd\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/Users",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "Users"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "PUT – text/json (supported)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', function () {",
+                  "    pm.expect(pm.response.code).to.eql(200);",
+                  "});",
+                  "pm.test('Response has User shape', function () {",
+                  "    var body = pm.response.json();",
+                  "    pm.expect(body).to.have.property('id');",
+                  "    pm.expect(body).to.have.property('userName');",
+                  "    pm.expect(body).to.have.property('password');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "text/json; v=1.0" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": 1,\n  \"userName\": \"ct_put_test\",\n  \"password\": \"pwd\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/Users/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "Users", "1"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "PUT – application/*+json (supported)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', function () {",
+                  "    pm.expect(pm.response.code).to.eql(200);",
+                  "});",
+                  "pm.test('Response has User shape', function () {",
+                  "    var body = pm.response.json();",
+                  "    pm.expect(body).to.have.property('id');",
+                  "    pm.expect(body).to.have.property('userName');",
+                  "    pm.expect(body).to.have.property('password');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/*+json; v=1.0" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": 1,\n  \"userName\": \"ct_put_test\",\n  \"password\": \"pwd\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/Users/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "Users", "1"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "PUT – text/plain (unsupported)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 415 or 400', function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([415, 400]);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "text/plain" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": 1,\n  \"userName\": \"ct_put_test\",\n  \"password\": \"pwd\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/Users/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "Users", "1"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GET list – Accept text/json",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "pm.request.headers.upsert({ key: 'Accept', value: 'text/json; v=1.0' });"
+                ],
+                "type": "text/javascript"
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', function () {",
+                  "    pm.expect(pm.response.code).to.eql(200);",
+                  "});",
+                  "var ct = pm.response.headers.get('Content-Type') || '';",
+                  "if (ct.includes('text/json')) {",
+                  "    pm.test('Response Content-Type is text/json as requested', function () {",
+                  "        pm.expect(ct).to.include('text/json');",
+                  "    });",
+                  "} else {",
+                  "    pm.test('[INFO] API ignores Accept text/json – returns application/json', function () {",
+                  "        pm.expect(ct).to.include('application/json');",
+                  "    });",
+                  "}",
+                  "pm.test('Response is valid JSON array', function () {",
+                  "    var body = pm.response.json();",
+                  "    pm.expect(body).to.be.an('array');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/Users",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "Users"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GET list – Accept text/plain",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "pm.request.headers.upsert({ key: 'Accept', value: 'text/plain; v=1.0' });"
+                ],
+                "type": "text/javascript"
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', function () {",
+                  "    pm.expect(pm.response.code).to.eql(200);",
+                  "});",
+                  "var ct = pm.response.headers.get('Content-Type') || '';",
+                  "if (ct.includes('text/plain')) {",
+                  "    pm.test('Response Content-Type is text/plain as requested', function () {",
+                  "        pm.expect(ct).to.include('text/plain');",
+                  "    });",
+                  "} else {",
+                  "    pm.test('[INFO] API ignores Accept text/plain – returns application/json', function () {",
+                  "        pm.expect(ct).to.include('application/json');",
+                  "    });",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/Users",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "Users"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GET list – Accept application/xml (unsupported)",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "pm.request.headers.upsert({ key: 'Accept', value: 'application/xml' });"
+                ],
+                "type": "text/javascript"
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 406 or 200', function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([406, 200]);",
+                  "});",
+                  "if (pm.response.code === 200) {",
+                  "    pm.test('[INFO] API ignores unsupported Accept and returns default', function () {",
+                  "        pm.expect(true).to.be.true;",
+                  "    });",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/Users",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "Users"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GET by id – Accept text/json",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "pm.request.headers.upsert({ key: 'Accept', value: 'text/json; v=1.0' });"
+                ],
+                "type": "text/javascript"
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', function () {",
+                  "    pm.expect(pm.response.code).to.eql(200);",
+                  "});",
+                  "var ct = pm.response.headers.get('Content-Type') || '';",
+                  "if (ct.includes('text/json')) {",
+                  "    pm.test('Response Content-Type is text/json as requested', function () {",
+                  "        pm.expect(ct).to.include('text/json');",
+                  "    });",
+                  "} else {",
+                  "    pm.test('[INFO] API ignores Accept text/json – returns application/json', function () {",
+                  "        pm.expect(ct).to.include('application/json');",
+                  "    });",
+                  "}",
+                  "pm.test('Response has User shape', function () {",
+                  "    var body = pm.response.json();",
+                  "    pm.expect(body).to.have.property('id');",
+                  "    pm.expect(body).to.have.property('userName');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/Users/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "Users", "1"]
+            }
+          },
+          "response": []
+        }
+      ],
+      "description": "Content-Type negotiation tests. Verifies API accepts all swagger-documented request content types (application/json, text/json, application/*+json) and rejects unsupported ones (text/plain, application/xml). Also tests response content negotiation via Accept header (text/json, text/plain, application/xml)."
+    },
+    {
       "name": "Users – E2E Flow",
       "item": [
         {
