@@ -1165,12 +1165,12 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"id\": {{userId}},\n  \"userName\": null,\n  \"password\": null\n}"
+              "raw": "{\n  \"id\": 1,\n  \"userName\": null,\n  \"password\": null\n}"
             },
             "url": {
-              "raw": "{{baseUrl}}/api/v1/Users/{{userId}}",
+              "raw": "{{baseUrl}}/api/v1/Users/1",
               "host": ["{{baseUrl}}"],
-              "path": ["api", "v1", "Users", "{{userId}}"]
+              "path": ["api", "v1", "Users", "1"]
             }
           },
           "response": []
