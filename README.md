@@ -28,6 +28,23 @@ npm run test:postman
 
 Open `reports/newman/report.html` for the HTML report.
 
+## Quick start (Docker)
+
+No Node.js or npm required — only Docker. Uses the official [`postman/newman:alpine`](https://hub.docker.com/r/postman/newman/) image:
+
+```bash
+bash scripts/docker-test.sh
+```
+
+Pass arguments to run specific folders or bail on failure:
+
+```bash
+bash scripts/docker-test.sh --folder "Users – E2E Flow"
+bash scripts/docker-test.sh --bail --folder "Users – Atomic"
+```
+
+JUnit report is written to `reports/newman/junit.xml`.
+
 ---
 
 ## Variables
@@ -113,6 +130,7 @@ Single flow: **POST → GET → PUT → GET (verify update) → DELETE → GET (
 | `npm run test:postman:boundary`  | Users – Boundary folder only |
 | `npm run test:postman:content-type` | Users – Content-Type folder only |
 | `npm run test:postman:e2e`       | Users – E2E Flow folder only |
+| `npm run test:docker`            | Full collection via [`postman/newman:alpine`](https://hub.docker.com/r/postman/newman/) Docker image (no local Node.js required) |
 
 Pass one or more folders explicitly:
 
