@@ -39,9 +39,12 @@ bash scripts/docker-test.sh
 Pass arguments to run specific folders or bail on failure:
 
 ```bash
-bash scripts/docker-test.sh --folder "Users – E2E Flow"
-bash scripts/docker-test.sh --bail --folder "Users – Atomic"
+npm run test:docker                                    # full collection
+npm run test:docker -- --folder "Users – E2E Flow"      # single folder
+npm run test:docker -- --bail --folder "Users – Atomic"  # bail on first failure
 ```
+
+Or call the script directly: `bash scripts/docker-test.sh` (same options).
 
 JUnit report is written to `reports/newman/junit.xml`.
 
