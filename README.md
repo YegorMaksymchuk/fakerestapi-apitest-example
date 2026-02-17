@@ -1,6 +1,11 @@
 # API Tests
 
-API testing for **Fake REST API** [Users](https://fakerestapi.azurewebsites.net/swagger/v1/swagger.json) endpoints. Postman/Newman collection with four modules: **Atomic** (per-endpoint tests), **Boundary** (int32/string/nullable edge cases), **Content-Type** (request/response media type negotiation), and **E2E Flow** (full lifecycle). Uses variables, response reuse, schema validation, and a mocked Bearer token.
+API testing for **Fake REST API** [Users](https://fakerestapi.azurewebsites.net/swagger/v1/swagger.json) endpoints. \
+Postman/Newman collection with four modules: \
+**Atomic** (per-endpoint tests) \
+**Boundary** (int32/string/nullable edge cases) \
+**Content-Type** (request/response media type negotiation) \
+**E2E Flow** (full lifecycle). Uses variables, response reuse, schema validation, and a mocked Bearer token.
 
 ## Contents
 
