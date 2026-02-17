@@ -6,6 +6,9 @@ API testing for **Fake REST API** [Users](https://fakerestapi.azurewebsites.net/
 **Content-Type** (request/response media type negotiation) \
 **E2E Flow** (full lifecycle). Uses variables, response reuse, schema validation, and a mocked Bearer token.
 
+## Demo
+[![asciicast](https://asciinema.org/a/Odv6LIdnmVgSJvtm.svg)](https://asciinema.org/a/Odv6LIdnmVgSJvtm)
+
 ## Contents
 
 | Tool            | Folder    | Status      |
