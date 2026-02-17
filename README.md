@@ -1,7 +1,6 @@
 # API Tests
 
-API testing for **Fake REST API** [Users](https://fakerestapi.azurewebsites.net/swagger/v1/swagger.json) endpoints. \
-Postman/Newman collection with four modules: \
+API testing for **Fake REST API** [Users](https://fakerestapi.azurewebsites.net/swagger/v1/swagger.json) endpoints. Postman/Newman collection with four modules: \
 **Atomic** (per-endpoint tests) \
 **Boundary** (int32/string/nullable edge cases) \
 **Content-Type** (request/response media type negotiation) \
